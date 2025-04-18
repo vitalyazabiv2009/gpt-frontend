@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Выбор модели</title>
+</head>
+<body>
+    <h2>Доступные модели:</h2>
+    <ul>
+        {% for model in models %}
+            <li>
+                <a href="{{ url_for('chat', model_id=model.id) }}">
+                    {{ model.id }} (Создана: {{ model.created }})
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
