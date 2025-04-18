@@ -5,14 +5,19 @@
 </head>
 <body>
     <h2>Доступные модели:</h2>
-    <ul>
-        {% for model in models %}
-            <li>
-                <a href="{{ url_for('chat', model_id=model.id) }}">
-                    {{ model.id }} (Создана: {{ model.created }})
-                </a>
-            </li>
-        {% endfor %}
-    </ul>
+            <!-- В models.html добавьте проверку структуры данных -->
+        {% if models %}
+        <ul>
+            {% for model in models %}
+                {% if model.id %}
+                    <li><a href="{{ url_for('chat', model_id=model.id) }}">{{ model.id }}</a></li>
+                {% else %}
+                    <li>Некорректные данные модели</li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>Не удалось получить список моделей</p>
+        {% endif %}
 </body>
 </html>

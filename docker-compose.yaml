@@ -1,0 +1,13 @@
+services:
+  gpt-frontend:
+    build: .
+    container_name: gpt-frontend
+    ports:
+      - "5003:5000"
+    restart: always
+    environment:
+      FLASK_ENV: production
+    volumes:
+      - .:/app
+    command: >
+      sh -c "python app.py"

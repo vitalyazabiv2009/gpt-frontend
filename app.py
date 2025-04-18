@@ -40,30 +40,43 @@ def chat(model_id):
         history = session.get('chat_history', [])
         history.append({"role": "user", "content": user_message})
         
-        response = requests.post(
-            f'{API_BASE}/chat/completions',
-            headers={'Authorization': f'Bearer {api_key}'},
-            json={
-                "model": model_id,
-                "messages": [
-                    {"role": "system", "content": "Ты помощник"},
-                    *history
-                ],
-                "temperature": 0.6
-            }
-        )
-        
-        if response.status_code == 200:
-            assistant_reply = response.json()['choices'][0]['message']['content']
-            history.append({"role": "assistant", "content": assistant_reply})
-            session['chat_history'] = history
+        try:
+            response = requests.post(
+                f'{API_BASE}/chat/completions',
+                headers={'Authorization': f'Bearer {api_key}'},
+                json={
+                    "model": model_id,
+                    "messages": [
+                        {"role": "system", "content": "Ты помощник"},
+                        *history
+                    ],
+                    "temperature": 0.6
+                }
+            )
+            
+            if response.status_code != 200:
+                return f"Ошибка API: {response.status_code} - {response.text}"
+            
+            # Извлекаем ответ с проверкой структуры
+            response_data = response.json()
+            assistant_reply = response_data['choices'][0]['message']['content']
+            role = response_data['choices'][0]['message']['role']
+            
+            # Сохраняем только user/assistant сообщения
+            history.append({"role": role, "content": assistant_reply})
+            session['chat_history'] = history[-20:]  # Ограничиваем историю
+            
             return render_template('chat.html', model_id=model_id, history=history)
-        else:
-            return f"Ошибка: {response.status_code} - {response.text}"
+            
+        except Exception as e:
+            return f"Ошибка обработки: {str(e)}"
     
     session['chat_history'] = []
     return render_template('chat.html', model_id=model_id, history=[])
 
+@app.errorhandler(Exception)
+def handle_exception(e):
+    return f"Произошла ошибка: {str(e)}", 500
 
 
 if __name__ == '__main__':
